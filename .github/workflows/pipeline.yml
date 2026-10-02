@@ -6,10 +6,10 @@ on:
   #  branches: [ main ]
   schedule:
     # Alternative intervals (uncomment one and comment out the active line below):
-    #- cron: "0 0 * * *"    # every day at midnight UTC
     #- cron: '0 * * * *'    # every hour
     #- cron: '0 */6 * * *'  # every 6 hours
-    - cron: '0 0 1 * *'     # active: monthly, 1st of month at 00:00 UTC
+    #- cron: '0 0 1 * *'    # monthly, 1st of month at 00:00 UTC
+    - cron: '0 2 * * *'     # active: daily at 02:00 UTC (03:00 CET / 04:00 CEST)
 
 jobs:
   run-pipeline:
