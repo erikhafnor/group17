@@ -23,10 +23,14 @@ jobs:
     - name: Run Pipeline
       env:
         SPARK_HOME: /opt/spark
-        JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
+        JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+        # Without this the pipelines fall back to a hardcoded /home/ubuntu/spark-lab-data,
+        # which would collide with whatever the dev/prod workflows wrote there.
+        DAT535_OUTPUT_DIR: /home/ubuntu/spark-lab-data/scheduled
       run: |
         # Activate the environment
         source ~/spark-env/bin/activate
+        mkdir -p "$DAT535_OUTPUT_DIR"
           
         # Run the pipeline
         echo "=== Starting Data Pipeline Execution ==="
