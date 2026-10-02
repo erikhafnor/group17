@@ -3,8 +3,10 @@ name: DAT535 — Dev Pipeline
 on:
   push:
     branches: [dev]
-  pull_request:
-    branches: [dev]
+  # NOTE: the pull_request trigger is deliberately absent.
+  # This repo is public and uses a self-hosted runner on the group's OpenStack VM.
+  # A pull_request trigger would let anyone fork the repo, open a PR, and execute
+  # their code on that VM. Only collaborators can push, so push-only is safe.
   workflow_dispatch:
 
 jobs:
