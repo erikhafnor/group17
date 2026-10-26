@@ -8,6 +8,8 @@ Gold tables answer one question for hospital medical-technology departments: whi
 and manufacturers account for reports of deaths, injuries and malfunctions, and how does that
 develop over time?
 
+- The whole project on one page: [docs/project-overview.excalidraw](docs/project-overview.excalidraw)
+  (open it in [excalidraw.com](https://excalidraw.com) or the VS Code Excalidraw extension)
 - What we build and why: [docs/project-definition.md](docs/project-definition.md)
 - What the source files look like: [docs/source-profile.md](docs/source-profile.md)
 - What is left to do: [docs/backlog.md](docs/backlog.md)
