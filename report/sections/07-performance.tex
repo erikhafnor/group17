@@ -1,0 +1,11 @@
+\section{Performance}
+\label{sec:performance}
+
+% The course asks for evidence before optimisation: identify the main bottleneck, explain a
+% proportionate improvement, and say why further tuning is or is not justified.
+
+\todo{Method: stage timings from run reports, Spark UI and \texttt{explain()} plans on a full
+production run. Main bottleneck found, the one or two improvements we tried with before/after
+numbers, and why we stopped there. Candidates: column pruning when reading Bronze, partitioning
+Silver by received month, co-partitioning reports and devices, broadcast lookups, skew in
+product-code aggregations.}

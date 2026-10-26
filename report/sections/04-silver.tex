@@ -1,0 +1,48 @@
+\section{Silver Layer}
+\label{sec:silver}
+
+% The guide puts the most weight here: grain, model, cleaning, standardisation, enrichment,
+% quality evidence, Spark implementation, performance, lifecycle and scalability.
+
+\subsection{Data model and grain}
+
+\todo{Table of Silver tables with grain and keys (reports, devices, patients, problem bridges,
+product classification, manufacturers), and a small entity-relationship figure.}
+
+\subsection{Version resolution}
+
+A master record is one \emph{version} of a report. Silver keeps the newest version of each
+\texttt{mdr\_report\_key}, ordered by date changed, then file kind (change before add before
+history), then file publication time (Listing~\ref{lst:versions}). On the October 2026 dev run
+this turned 1{,}104{,}177 Bronze rows into 699{,}066 reports, with 405{,}111 superseded
+versions.
+
+\begin{lstlisting}[caption={Newest version per report.},label={lst:versions}]
+newest_first = Window.partitionBy("mdr_report_key").orderBy(
+    F.col("date_changed").desc_nulls_last(),
+    F.col("_source_rank").desc(),
+    F.col("_source_modified_at").desc_nulls_last())
+current = (typed.filter(F.col("_reject_reason").isNull())
+    .withColumn("_version", F.row_number().over(newest_first))
+    .filter(F.col("_version") == 1))
+\end{lstlisting}
+
+\subsection{Cleaning and standardisation}
+
+\todo{Rules per category (reject to quarantine, correct, flag), with the reason codes; dates,
+ages, weights, flags, multi-valued fields, canonical manufacturer names.}
+
+\subsection{Enrichment}
+
+\todo{Product classification and problem-code joins; derived attributes.}
+
+\subsection{Quality evidence}
+
+\todo{Before/after table per Silver table: input rows, malformed, rejected by reason,
+superseded, output rows, null rates of essential fields, referential integrity. Use the run
+reports from production runs.}
+
+\subsection{Implementation and testing}
+
+\todo{Where we use basic transformations and actions, and where the DataFrame and SQL APIs;
+how each rule is tested with fixtures.}

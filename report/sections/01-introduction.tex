@@ -1,0 +1,35 @@
+\section{Introduction}
+\label{sec:introduction}
+
+When a medical device malfunctions or is suspected of contributing to a death or serious injury,
+manufacturers and hospitals in the United States must report it to the Food and Drug
+Administration (FDA). The reports are published in the MAUDE database (Manufacturer and User
+Facility Device Experience)~\cite{fda-mdr-files}. For a hospital medical-technology department,
+MAUDE is one of few public sources that show how specific device types and models fail in real
+use, which makes it relevant input for procurement, risk assessment and preventive maintenance.
+
+Using MAUDE at scale is a data engineering problem before it is an analysis problem. The data is
+published as tens of gigabytes of pipe-delimited text spread over six linked file families, and
+it is refreshed through monthly add and change files. Careless use of the files is known to
+produce wrong counts~\cite{ensign2017primer}.
+
+We build a pipeline that turns these files into trusted tables, using the medallion
+architecture~\cite{armbrust2021lakehouse}: Bronze keeps the source as delivered, Silver holds
+validated and standardised entities, and Gold serves a defined consumer. Spark's DataFrame and
+SQL APIs~\cite{armbrust2015sparksql,zaharia2016spark} do the processing.
+
+\todo{Our own motivation for the topic, in two or three sentences.}
+
+Our contributions are:
+\begin{itemize}
+  \item a Bronze layer that preserves every source file unchanged and records its lineage,
+        and parses MAUDE's irregular record format without losing records
+        (Section~\ref{sec:bronze});
+  \item a Silver model with an explicit grain per entity, version resolution for re-delivered
+        reports, and quality rules whose effect we measure on every run
+        (Section~\ref{sec:silver});
+  \item Gold tables for a device-safety dashboard (Section~\ref{sec:gold});
+  \item an operated pipeline with tests, separate environments, approval-gated deployment and a
+        weekly schedule (Section~\ref{sec:operations}), and evidence-based performance work
+        (Section~\ref{sec:performance}).
+\end{itemize}

@@ -1,0 +1,3 @@
+# Runtime dependencies. The pipeline itself only needs PySpark and the standard library.
+# The self-hosted runner uses its own ~/spark-env; the workflow logs which versions it ran with.
+pyspark==3.5.3

@@ -1,0 +1,31 @@
+# Development environment: runs on every push to `dev`.
+# Ingests only the reference lookups and the latest monthly add/change files,
+# so a full Bronze -> Gold run finishes in minutes on the runner VM.
+
+env = "dev"
+data_root = "~/maude-data/dev"
+source_base_url = "https://www.accessdata.fda.gov/MAUDE/ftparea"
+classification_base_url = "https://www.accessdata.fda.gov/premarket/ftparea"
+
+file_sets = ["lookups", "monthly"]
+
+# Year of the newest cumulative "thru" file published by FDA (mdrfoithru2025.zip, ...).
+history_through = 2025
+# Annual device/text files to ingest when the "history" file set is enabled.
+history_years = []
+
+# FDA renames the problem-code lookups when it publishes a new edition.
+device_problem_codes = "deviceproblemcodes2025"
+patient_problem_codes = "patientproblemcodes2026"
+
+[spark]
+"spark.master" = "local[*]"
+"spark.driver.memory" = "4g"
+"spark.sql.shuffle.partitions" = "16"
+"spark.sql.adaptive.enabled" = "true"
+"spark.sql.sources.partitionOverwriteMode" = "dynamic"
+"spark.sql.session.timeZone" = "UTC"
+# Invalid values become null and are counted in Silver instead of failing the job,
+# with the same behaviour on Spark 3.5 and Spark 4 (where ANSI mode is on by default).
+"spark.sql.ansi.enabled" = "false"
+"spark.sql.legacy.timeParserPolicy" = "CORRECTED"
