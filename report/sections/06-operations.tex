@@ -1,0 +1,17 @@
+\section{Operating the Pipeline}
+\label{sec:operations}
+
+We treat operation as part of the data engineering lifecycle~\cite{reis2022fundamentals}, not as
+an afterthought. Every change travels the same path. A feature branch is merged into \texttt{dev} through a pull
+request reviewed by the other group member, after lint and unit tests pass on a GitHub-hosted
+runner. A push to \texttt{dev} runs the pipeline against the development data area on our
+self-hosted runner. A pull request from \texttt{dev} to \texttt{main} releases to production,
+and the production run waits for approval from the member who did not trigger it. A weekly
+scheduled run picks up FDA's monthly release; it runs code from \texttt{main} only.
+
+Development and production differ only in configuration: which source files to ingest, where
+the data lives, and Spark settings. Each run writes a quality report and a log, which GitHub
+Actions shows as the run summary and keeps as artifacts.
+
+\todo{Evidence: a scheduled production run end to end (screenshot or log excerpt), how a failure
+shows up, what we monitor, and how another engineer clones and runs the project.}

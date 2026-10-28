@@ -1,0 +1,29 @@
+# Test environment: used by pytest and the CI workflow.
+# The tests point source_base_url and data_root at temporary directories
+# through MAUDE_SOURCE_BASE_URL and MAUDE_DATA_ROOT.
+
+env = "test"
+data_root = "/tmp/maude-test"
+source_base_url = "tests/fixtures/source"
+classification_base_url = "tests/fixtures/source"
+
+file_sets = ["lookups", "monthly"]
+
+history_through = 2025
+history_years = []
+
+device_problem_codes = "deviceproblemcodes2025"
+patient_problem_codes = "patientproblemcodes2026"
+
+[spark]
+"spark.master" = "local[1]"
+"spark.driver.memory" = "1g"
+"spark.sql.shuffle.partitions" = "1"
+"spark.sql.adaptive.enabled" = "false"
+"spark.sql.sources.partitionOverwriteMode" = "dynamic"
+"spark.sql.session.timeZone" = "UTC"
+# Invalid values become null and are counted in Silver instead of failing the job,
+# with the same behaviour on Spark 3.5 and Spark 4 (where ANSI mode is on by default).
+"spark.sql.ansi.enabled" = "false"
+"spark.sql.legacy.timeParserPolicy" = "CORRECTED"
+"spark.ui.enabled" = "false"

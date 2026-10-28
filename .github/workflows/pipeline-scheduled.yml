@@ -1,0 +1,25 @@
+name: Pipeline (prod schedule)
+
+# FDA republishes the MAUDE files once a month, on no fixed day. We check
+# weekly; ingestion skips files whose Last-Modified and size are unchanged,
+# so most weekly runs only refresh Silver and Gold.
+#
+# Scheduled runs only ever execute code from main, which has already passed a
+# reviewed pull request and an approved deployment, so they run without a
+# manual approval gate.
+on:
+  schedule:
+    - cron: "0 4 * * 1" # Mondays 04:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pipeline:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/_pipeline.yml
+    with:
+      env: prod
+      stage: all
+      retention-days: 90

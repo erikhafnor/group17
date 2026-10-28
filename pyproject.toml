@@ -1,0 +1,27 @@
+[project]
+name = "maude-pipeline"
+version = "0.1.0"
+description = "Medallion pipeline for FDA MAUDE medical device adverse event reports (DAT535, group 17)"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "Erik Hafnor" },
+    { name = "Martin Sævareid Lauritsen" },
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-ra"
+filterwarnings = ["ignore::DeprecationWarning:pyspark.*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["maude"]
