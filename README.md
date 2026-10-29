@@ -1,204 +1,107 @@
-# DAT535
+# MAUDE medallion pipeline
 
-## Spark Lab Pipelines
+**DAT535 project, group 17:** Erik Hafnor and Martin Sævareid Lauritsen, University of Stavanger
 
-Spark pipelines for learning distributed data processing.
+We turn the FDA's public MAUDE database of medical device adverse event reports into trusted,
+analysis-ready tables with PySpark and a Bronze, Silver and Gold (medallion) architecture. The
+Gold tables answer one question for hospital medical-technology departments: which device types
+and manufacturers account for reports of deaths, injuries and malfunctions, and how does that
+develop over time?
 
-### Repo Structure
+- The whole project on one page: [docs/project-overview.excalidraw](docs/project-overview.excalidraw)
+  (open it in [excalidraw.com](https://excalidraw.com) or the VS Code Excalidraw extension)
+- What we build and why: [docs/project-definition.md](docs/project-definition.md)
+- What the source files look like: [docs/source-profile.md](docs/source-profile.md)
+- What is left to do: [docs/backlog.md](docs/backlog.md)
+- How we work together: [CONTRIBUTING.md](CONTRIBUTING.md)
+- AI use disclosure: [docs/ai-use.md](docs/ai-use.md)
 
-```text
-.
-├── README.md                    # This file
-├── project_cicd_guide.md        # Dev/Prod CI/CD hands-on guide (GitHub Environments, branch strategy, exercise)
-├── run_pipeline.py              # Pipeline orchestrator (lab2 -> lab3)
-├── lab2_pipeline.py             # Lab 2: Fundamentals + MapReduce + Medallion Architecture
-├── lab3_pipeline.py             # Lab 3: Window functions, joins, UDFs, streaming, production patterns
-├── lab1_install-spark.sh        # Lab 1: Bash script to install Spark, Java, Python 3.11 & packages
-├── lab2_spark_fundamentals.ipynb# Lab 2 notebook: Fundamentals + MapReduce + Medallion Architecture
-├── lab3_advanced_spark.ipynb    # Lab 3 notebook: Window functions, joins, UDFs, streaming, production patterns
-└── .github/
-    └── workflows/
-        ├── pipeline.yml         # Scheduled & dispatch pipeline workflow
-        ├── dat535-dev.yml       # Dev branch CI pipeline workflow
-        └── dat535-prod.yml      # Main branch production deployment workflow
+## Architecture
+
+```mermaid
+flowchart LR
+    FDA["FDA MAUDE<br/>zip files<br/>(history, current,<br/>monthly add/change)"]
+    subgraph Bronze
+        L["landing/<br/>original zips,<br/>read-only"]
+        T["tables/&lt;family&gt;<br/>all-string Parquet<br/>+ lineage columns"]
+    end
+    subgraph Silver
+        R["reports, devices,<br/>patients, problems"]
+        Q["_quarantine/<br/>rejected rows + reason"]
+    end
+    subgraph Gold
+        G["dashboard tables<br/>per month, product code,<br/>manufacturer"]
+    end
+    FDA -->|"weekly download,<br/>skip if unchanged"| L --> T
+    T -->|"validate, standardise,<br/>newest version per report"| R
+    T --> Q
+    R -->|"aggregate,<br/>reconcile with Silver"| G
 ```
 
-### Overview
+Each run writes a quality report (`metrics.json` and `summary.md`) and a log. GitHub Actions shows
+the summary on the run page and keeps both as artifacts.
 
-The Jupyter notebooks in this folder teach Apache Spark end-to-end across **two consolidated labs**
-that share **one single e-commerce clickstream dataset** (generated once in Lab 2, reused by Lab 3):
+## Quick start
 
-| Lab   | Notebook                        | Key Concepts                                                                                                                                                                                                                                                 |
-| ----- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Lab 2 | `lab2_spark_fundamentals.ipynb` | SparkSession & architecture, RDD/DataFrame/SQL/pandas conversions, column ops & type casting, filtering/sorting/aggregations, Parquet/CSV/JSON I/O, MapReduce with RDDs, the Medallion Architecture (Bronze/Silver/Gold)                                     |
-| Lab 3 | `lab3_advanced_spark.ipynb`     | Window functions, partitioning strategies, caching/persistence, every join type + broadcast joins, query optimization, UDFs vs pandas UDFs vs built-ins, Structured Streaming basics, production patterns (incremental processing, data quality, SCD Type 2) |
-
-The `.py` pipeline scripts (`lab2_pipeline.py`, `lab3_pipeline.py`, `run_pipeline.py`) mirror the same
-two-lab structure as the notebooks: `lab2_pipeline.py` generates the shared dataset and builds the
-Medallion pipeline, and `lab3_pipeline.py` loads Lab 2's Silver output and runs the advanced/production
-patterns. Run Lab 2 before Lab 3 (or use `python run_pipeline.py all`).
-
-### Quick Start
-
-1. **Install Prerequisites (Lab 1)**:
-
-    Complete the `lab1_install-spark.sh` script on Ubuntu VM for clearting Spark.
-
-   ```bash
-   chmod +x lab1_install-spark.sh
-   ./lab1_install-spark.sh
-   source ~/spark-env/bin/activate
-   ```
-
-2. Run Pipeline Scripts:
-
-    ```bash
-    # Run individual labs
-    python run_pipeline.py lab2
-    python run_pipeline.py lab3
-
-    # Run all labs (Lab 2 then Lab 3)
-    python run_pipeline.py all
-    ```
-
-### Lab Details
-
-#### Lab 2: Spark Fundamentals & the Medallion Architecture
-
-**Learning Objectives:**
-
-- Create and configure a SparkSession; understand driver/executor/task/partition
-- Convert data between RDD, DataFrame, SQL views and pandas
-- Perform DataFrame operations (select, withColumn, cast, filter, sort)
-- Run aggregations and groupBy operations
-- Read/write data in multiple formats (Parquet, CSV, JSON, partitioned)
-- Apply MapReduce patterns directly with RDDs (map, flatMap, reduceByKey)
-- Build a Bronze -> Silver -> Gold pipeline with data-quality quarantining
-
-**Output (shared with Lab 3):**
-
-```text
-~/spark-lab-data/shared/
-├── bronze/events/
-├── silver/
-│   ├── events/
-│   └── quarantine/
-└── gold/
-    ├── daily_metrics/
-    ├── user_metrics/
-    ├── product_metrics/
-    └── category_metrics/
-
-~/spark-lab-data/lab2/            # scratch I/O examples (parquet/csv/json/partitioned)
-```
-
-#### Lab 3: Advanced Spark & Production Patterns
-
-**Learning Objectives:**
-
-- Master window functions (ranking, lag/lead, running totals, moving averages)
-- Understand partitioning strategies and partition pruning
-- Implement caching/persistence and compare storage levels
-- Perform every join type (inner/left/right/full/semi/anti) and optimize with broadcast joins
-- Apply query optimization techniques (filter/column pushdown, execution plans)
-- Compare UDFs, pandas UDFs and built-in functions
-- Build a minimal Structured Streaming pipeline with a windowed aggregation
-- Learn production patterns: incremental processing, data quality checks, SCD Type 2, safe aggregation
-
-**Input:** loads the Silver-layer dataset produced by Lab 2 from `~/spark-lab-data/shared/silver/events`
-(run Lab 2 first).
-
-**Output:**
-
-```text
-~/spark-lab-data/lab3/
-└── partitioned_data/
-    ├── no_partition/
-    ├── date_partition/
-    └── multi_partition/
-```
-
-## GitHub Actions CI/CD Guide
-
-The repo contains the automated workflows for the DAT535 project. These workflows use GitHub Actions to schedule data pipelines, execute Spark jobs, and deploy code updates.
-
-**Important**: These pipelines are designed to execute on **self-hosted runners** configured with Apache Spark and Java.
-
-**For the full dev/prod concepts, GitHub Environments setup, and hands-on exercise, see [project_cicd_guide.md](project_cicd_guide.md).**
-
-### Available Workflows
-
-We have configured the following automated processes:
-
-#### Pipeline ([pipeline.yml](.github/workflows/pipeline.yml))
-
-- **Triggers**:
-  - Scheduled cron job (monthly, 1st of the month at 00:00 UTC: `0 0 1 * *` which can be changed).
-  - Manual dispatch (workflow_dispatch).
-  - Push to `main` is defined in the file but currently commented out.
-
-- **Key Tasks**:
-  - Checks out the repository code.
-  - Activates the Python environment (`source ~/spark-env/bin/activate`).
-  - Sets environment variables (`SPARK_HOME=/opt/spark`, `JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64`).
-  - Executes all pipelines via `python $GITHUB_WORKSPACE/run_pipeline.py all`.
-
-### Infrastructure & Environment Setup
-
-These workflows use `runs-on: self-hosted` targeting self-hosted infrastructure equipped with PySpark.
-
-#### Self-Hosted Runner Requirements
-
-The runner environment requires the following predefined paths and dependencies:
-
-- **Python Virtual Environment**: `~/spark-env/`
-- **Spark Home**: `/opt/spark`
-- **Java Home**: `/usr/lib/jvm/java-8-openjdk-amd64`
-
-**⚠️ Note for Personal Forks:**
-If you fork this repository to your personal GitHub account, you will need to set up a self-hosted runner with Spark and Java installed.
-
-### Setting up a Self-Hosted Runner
-
-To execute these pipelines on your own infrastructure (e.g., your VM), follow these steps:
-
-#### Step 1: Register and Start Runner
-
-1. Go to your repository on GitHub.
-2. Navigate to **Settings** > **Actions** > **Runners** > **New self-hosted runner**.
-3. Select the operating system (linux) and architecture matching (x64) your runner host.
-4. Execute the configuration commands provided by GitHub on the VM:
+Requirements: Python 3.11 or newer and Java 17.
 
 ```bash
-# Create a folder
-mkdir actions-runner && cd actions-runner
-
-# Download the runner package (Get the specific link for your OS from GitHub UI > Settings > Actions > Runners)
-curl -o actions-runner-osx-x64-2.337.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.337.0/actions-runner-osx-x64-2.337.0.tar.gz
-
-# Extract
-tar xzf ./actions-runner-osx-x64-2.337.0.tar.gz
-
-# Configure (You will need the token from the GitHub UI)
-./config.sh --url https://github.com/OWNER/REPO --token YOUR_TOKEN
-
-# Start the runner
-# To keep the runner alive after closing the terminal, install as a service:
-sudo ./svc.sh install 
-sudo ./svc.sh start
+git clone https://github.com/erikhafnor/group17.git
+cd group17
+make venv                        # .venv with PySpark, pytest and ruff
+make test                        # unit tests on small synthetic fixtures
+make run ENV=dev                 # real FDA monthly files; about 150 MB download
+make run ENV=dev STAGE=silver    # rerun one stage
 ```
 
-#### Step 2: Triggering Manually
+On macOS, point Spark at Java 17 first: `export JAVA_HOME=$(/usr/libexec/java_home -v 17)`.
 
-You can test a pipeline without waiting for the schedule:
+By default, data goes to `~/maude-data/<env>`. Set `MAUDE_DATA_ROOT` to write somewhere else,
+for example on a laptop with little free space.
 
-1. Go to the **Actions** tab.
-2. Select a workflow (e.g., "Pipeline") from the left sidebar.
-3. Click the **Run workflow** dropdown button on the right.
-4. Click **Run workflow**.
+## Repository layout
 
-### CI/CD Troubleshooting
+```text
+config/            dev.toml, prod.toml, test.toml: data area, file sets, Spark settings
+src/maude/
+  sources.py       catalogue of FDA files and which sets each environment ingests
+  bronze/          ingest.py (download, checksum, land), parse.py (zip -> Bronze table), manifest.py
+  silver/          cleaning.py (shared column rules), reports.py, ...
+  gold/            event_counts.py, ...
+  pipeline.py      runs the stages and writes the run report
+tests/             pytest suite; conftest.py builds fixture zips that reproduce the source quirks
+docs/              project definition, source profile, backlog, AI use log
+report/            project report (ACM LaTeX template)
+labs/              our completed lab work (Labs 1-3); its workflows are kept for reference only
+.github/           workflows and pull request template
+```
 
-- **Virtual Environment Not Found**: Ensure `~/spark-env/bin/activate` exists on the self-hosted runner.
-- **Java / Spark Path Mismatch**: Verify `JAVA_HOME` and `SPARK_HOME` paths on your runner match the environment settings.
-- **Permission Denied**: If `run_pipeline.py` fails to run, make it executable via `git update-index --chmod=+x run_pipeline.py`.
+## Environments and workflows
+
+| | dev | prod |
+|---|---|---|
+| Configuration | `config/dev.toml` | `config/prod.toml` |
+| Source files | lookups + monthly add/change | lookups + history + current year + monthly |
+| Data area on the runner | `~/maude-data/dev` | `~/maude-data/prod` |
+| GitHub environment | `dev` (no gate) | `main` (approval by the other member) |
+
+| Workflow | Trigger | Runs on |
+|---|---|---|
+| [CI](.github/workflows/ci.yml) | pull requests and pushes to `dev`/`main` | GitHub-hosted: ruff + pytest |
+| [Report](.github/workflows/report.yml) | changes under `report/` | GitHub-hosted: builds `main.pdf` |
+| [Pipeline (dev)](.github/workflows/pipeline-dev.yml) | push to `dev`, manual | self-hosted runner |
+| [Pipeline (prod deploy)](.github/workflows/pipeline-prod.yml) | merge to `main`, manual; needs approval | self-hosted runner |
+| [Pipeline (prod schedule)](.github/workflows/pipeline-scheduled.yml) | Mondays 04:00 UTC, manual | self-hosted runner |
+
+The pipeline workflows share one job definition, [_pipeline.yml](.github/workflows/_pipeline.yml).
+They run on `group17-runner`, our OpenStack VM with Spark in `/opt/spark`, Java 17 and the
+Python environment `~/spark-env`. Pull requests never run on that VM: the repository is public,
+so only pushes by collaborators reach it.
+
+## Data source
+
+U.S. Food and Drug Administration, *MAUDE – Manufacturer and User Facility Device Experience*,
+[MDR data files](https://www.fda.gov/medical-devices/medical-device-reporting-mdr-how-report-medical-device-problems/mdr-data-files),
+and the [product classification database](https://www.fda.gov/medical-devices/classify-your-medical-device/download-product-code-classification-files).
+MAUDE reports are passive surveillance data: they can be incomplete, unverified or duplicated,
+and report counts say nothing about how often a device fails.

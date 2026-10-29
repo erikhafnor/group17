@@ -1,0 +1,28 @@
+name: Pipeline (prod deploy)
+
+# A merge to main deploys to production. The `main` environment requires
+# approval from the other group member before this job may start.
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["report/**", "docs/**", "labs/**", "**.md"]
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: Stage to run
+        type: choice
+        options: [all, bronze, silver, gold]
+        default: all
+
+permissions:
+  contents: read
+
+jobs:
+  pipeline:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/_pipeline.yml
+    with:
+      env: prod
+      stage: ${{ inputs.stage || 'all' }}
+      environment: main
+      retention-days: 90

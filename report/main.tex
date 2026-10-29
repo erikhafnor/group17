@@ -1,0 +1,65 @@
+%% DAT535 project report, group 17.
+%% ACM acmart template, sigconf (two-column) format. `nonacm` removes the ACM
+%% copyright block, conference footer and reference format, which do not apply
+%% to a course report. Build with `make` in this folder, or let the Report
+%% workflow build it on GitHub.
+\documentclass[sigconf,nonacm]{acmart}
+
+\usepackage{listings}
+
+\lstset{
+  basicstyle=\ttfamily\scriptsize,
+  columns=fullflexible,
+  breaklines=true,
+  frame=tb,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape,
+  showstringspaces=false,
+  language=Python,
+}
+
+%% Visible placeholders, so nothing unfinished slips into the hand-in.
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+
+\begin{document}
+
+\title{From Passive Reports to Trusted Tables}
+\subtitle{A Medallion Pipeline for FDA MAUDE Medical Device Adverse Events}
+
+\author{Erik Hafnor}
+\affiliation{%
+  \institution{University of Stavanger}
+  \city{Stavanger}
+  \country{Norway}}
+
+\author{Martin Sævareid Lauritsen}
+\affiliation{%
+  \institution{University of Stavanger}
+  \city{Stavanger}
+  \country{Norway}}
+
+\renewcommand{\shortauthors}{Hafnor and Lauritsen}
+
+\begin{abstract}
+\input{sections/00-abstract}
+\end{abstract}
+
+\keywords{data engineering, medallion architecture, Apache Spark, data quality,
+medical devices, adverse event reporting, MAUDE}
+
+\maketitle
+
+\input{sections/01-introduction}
+\input{sections/02-dataset}
+\input{sections/03-bronze}
+\input{sections/04-silver}
+\input{sections/05-gold}
+\input{sections/06-operations}
+\input{sections/07-performance}
+\input{sections/08-reflection}
+\input{sections/09-conclusion}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+\end{document}

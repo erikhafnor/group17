@@ -1,0 +1,29 @@
+# Production environment: runs after an approved deployment from `main`
+# and on the weekly schedule.
+# history_years is deliberately small until we have measured disk use on the
+# runner VM; widening it is a config change, not a code change.
+
+env = "prod"
+data_root = "~/maude-data/prod"
+source_base_url = "https://www.accessdata.fda.gov/MAUDE/ftparea"
+classification_base_url = "https://www.accessdata.fda.gov/premarket/ftparea"
+
+file_sets = ["lookups", "history", "current", "monthly"]
+
+history_through = 2025
+history_years = [2024, 2025]
+
+device_problem_codes = "deviceproblemcodes2025"
+patient_problem_codes = "patientproblemcodes2026"
+
+[spark]
+"spark.master" = "local[*]"
+"spark.driver.memory" = "6g"
+"spark.sql.shuffle.partitions" = "64"
+"spark.sql.adaptive.enabled" = "true"
+"spark.sql.sources.partitionOverwriteMode" = "dynamic"
+"spark.sql.session.timeZone" = "UTC"
+# Invalid values become null and are counted in Silver instead of failing the job,
+# with the same behaviour on Spark 3.5 and Spark 4 (where ANSI mode is on by default).
+"spark.sql.ansi.enabled" = "false"
+"spark.sql.legacy.timeParserPolicy" = "CORRECTED"

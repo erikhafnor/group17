@@ -1,4 +1,35 @@
+# Python
 __pycache__/
 *.pyc
 .venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Notebooks
 .ipynb_checkpoints/
+
+# Data never goes into git: it lives under ~/maude-data/<env> on the runner and our laptops
+data/
+*.zip
+*.parquet
+spark-warehouse/
+metastore_db/
+derby.log
+
+# LaTeX build output
+report/*.aux
+report/*.bbl
+report/*.blg
+report/*.fdb_latexmk
+report/*.fls
+report/*.log
+report/*.out
+report/*.synctex.gz
+report/*.toc
+report/main.pdf
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/

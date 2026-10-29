@@ -1,0 +1,28 @@
+name: Pipeline (dev)
+
+# Every push to dev runs the pipeline against the dev data area.
+# There is deliberately no pull_request trigger: the repository is public, and
+# a pull_request trigger would let anyone run code on our self-hosted runner.
+on:
+  push:
+    branches: [dev]
+    paths-ignore: ["report/**", "docs/**", "labs/**", "**.md"]
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: Stage to run
+        type: choice
+        options: [all, bronze, silver, gold]
+        default: all
+
+permissions:
+  contents: read
+
+jobs:
+  pipeline:
+    uses: ./.github/workflows/_pipeline.yml
+    with:
+      env: dev
+      stage: ${{ inputs.stage || 'all' }}
+      environment: dev
+      retention-days: 14

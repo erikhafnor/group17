@@ -1,0 +1,85 @@
+name: Run pipeline (reusable)
+
+# Shared job for the dev, prod and scheduled pipeline workflows. It runs on our
+# self-hosted runner (group17-runner on OpenStack), which has Spark in
+# /opt/spark, Java 17 and a Python environment in ~/spark-env.
+on:
+  workflow_call:
+    inputs:
+      env:
+        description: Pipeline configuration (config/<env>.toml)
+        type: string
+        required: true
+      stage:
+        description: Stage to run (all, bronze, silver or gold)
+        type: string
+        default: all
+      environment:
+        description: GitHub environment to deploy to; empty for no approval gate
+        type: string
+        default: ""
+      retention-days:
+        description: How long to keep the run's logs and quality report
+        type: number
+        default: 14
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    name: Pipeline (${{ inputs.env }}, ${{ inputs.stage }})
+    runs-on: self-hosted
+    environment: ${{ inputs.environment }}
+    timeout-minutes: 180
+    # Runs that share a data area must never overlap.
+    concurrency:
+      group: pipeline-${{ inputs.env }}
+      cancel-in-progress: false
+    env:
+      MAUDE_ENV: ${{ inputs.env }}
+      SPARK_HOME: /opt/spark
+      JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+      PYTHONPATH: src
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Show versions and resolve data area
+        id: setup
+        run: |
+          source ~/spark-env/bin/activate
+          python --version
+          python -c "import pyspark; print('pyspark', pyspark.__version__)"
+          java -version 2>&1 | head -1
+          data_root=$(python -c "from maude.config import load_config; print(load_config('$MAUDE_ENV').data_root)")
+          mkdir -p "$data_root"
+          df -h "$data_root" | tail -1
+          echo "data_root=$data_root" >> "$GITHUB_OUTPUT"
+
+      - name: Run pipeline
+        run: |
+          source ~/spark-env/bin/activate
+          python -m maude --stage "${{ inputs.stage }}"
+
+      - name: Publish run summary
+        if: always()
+        run: |
+          report=$(ls -d "${{ steps.setup.outputs.data_root }}"/reports/*-gh${{ github.run_id }}-${{ github.run_attempt }} 2>/dev/null | tail -1)
+          if [ -n "$report" ]; then
+            cat "$report/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No run report was written." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload logs and quality report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pipeline-${{ inputs.env }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ steps.setup.outputs.data_root }}/reports/*-gh${{ github.run_id }}-${{ github.run_attempt }}/
+            ${{ steps.setup.outputs.data_root }}/logs/*-gh${{ github.run_id }}-${{ github.run_attempt }}.log
+          retention-days: ${{ inputs.retention-days }}
+          if-no-files-found: warn
