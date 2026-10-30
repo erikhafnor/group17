@@ -3,7 +3,7 @@ PYTHON ?= .venv/bin/python
 ENV ?= dev
 STAGE ?= all
 
-.PHONY: help venv lint format test run report clean-report
+.PHONY: help venv lint format test run
 
 help:
 	@echo "make venv            create .venv with runtime + dev dependencies"
@@ -11,7 +11,6 @@ help:
 	@echo "make format          apply ruff fixes and formatting"
 	@echo "make test            run the test suite"
 	@echo "make run ENV=dev     run the pipeline (STAGE=bronze|silver|gold|all)"
-	@echo "make report          build report/main.pdf"
 
 venv:
 	python3 -m venv .venv
@@ -31,9 +30,3 @@ test:
 
 run:
 	PYTHONPATH=src $(PYTHON) -m maude --env $(ENV) --stage $(STAGE)
-
-report:
-	$(MAKE) -C report
-
-clean-report:
-	$(MAKE) -C report clean

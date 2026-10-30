@@ -8,8 +8,6 @@ Gold tables answer one question for hospital medical-technology departments: whi
 and manufacturers account for reports of deaths, injuries and malfunctions, and how does that
 develop over time?
 
-- The whole project on one page: [docs/project-overview.excalidraw](docs/project-overview.excalidraw)
-  (open it in [excalidraw.com](https://excalidraw.com) or the VS Code Excalidraw extension)
 - What we build and why: [docs/project-definition.md](docs/project-definition.md)
 - What the source files look like: [docs/source-profile.md](docs/source-profile.md)
 - What is left to do: [docs/backlog.md](docs/backlog.md)
@@ -71,7 +69,6 @@ src/maude/
   pipeline.py      runs the stages and writes the run report
 tests/             pytest suite; conftest.py builds fixture zips that reproduce the source quirks
 docs/              project definition, source profile, backlog, AI use log
-report/            project report (ACM LaTeX template)
 labs/              our completed lab work (Labs 1-3); its workflows are kept for reference only
 .github/           workflows and pull request template
 ```
@@ -88,7 +85,6 @@ labs/              our completed lab work (Labs 1-3); its workflows are kept for
 | Workflow | Trigger | Runs on |
 |---|---|---|
 | [CI](.github/workflows/ci.yml) | pull requests and pushes to `dev`/`main` | GitHub-hosted: ruff + pytest |
-| [Report](.github/workflows/report.yml) | changes under `report/` | GitHub-hosted: builds `main.pdf` |
 | [Pipeline (dev)](.github/workflows/pipeline-dev.yml) | push to `dev`, manual | self-hosted runner |
 | [Pipeline (prod deploy)](.github/workflows/pipeline-prod.yml) | merge to `main`, manual; needs approval | self-hosted runner |
 | [Pipeline (prod schedule)](.github/workflows/pipeline-scheduled.yml) | Mondays 04:00 UTC, manual | self-hosted runner |
