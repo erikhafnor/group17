@@ -164,8 +164,7 @@ uses.
   data never enters git.
 - **Environments:** `config/dev.toml` and `config/prod.toml`, separate data areas on the runner,
   and GitHub environments `dev` and `main`.
-- **Automated checks:** lint and tests on GitHub-hosted runners for every pull request; the
-  report's LaTeX build is checked as well.
+- **Automated checks:** lint and tests on GitHub-hosted runners for every pull request.
 - **Deployment and schedule:** a push to `dev` runs the dev pipeline; a merge to `main` runs
   production after the other member approves; a weekly scheduled production run picks up FDA's
   monthly release.

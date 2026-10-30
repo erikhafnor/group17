@@ -52,9 +52,8 @@ on `main`.
 - `make format` before pushing keeps reviews free of formatting noise.
 - AI use goes into [docs/ai-use.md](docs/ai-use.md) in the same pull request.
 
-## Report
+## Report and presentation
 
-The report is LaTeX in `report/` (ACM `acmart` template, `sigconf` format). Each section is its
-own file under `report/sections/`, so we can edit in parallel. The Report workflow builds the PDF
-on every change; `make report` builds it locally if TeX Live is installed. Overleaf can also open
-the folder, but `report/` in git stays the version we hand in.
+We write the report and prepare the presentation outside this repository. `.gitignore` keeps
+`report/`, `presentation/` and `*.excalidraw` files out of git, so local copies in the working tree
+are never committed by accident.

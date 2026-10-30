@@ -38,7 +38,7 @@ one pull request, reviewed by the other person.
 - [ ] Performance: profile the first full prod run (stage timings, Spark UI, `explain()`), then
       test one improvement at a time and record before/after
 - [ ] Dashboard or notebook on the Gold tables for the demonstration
-- [ ] Report sections in `report/` (each of us drafts the sections for our own stream)
+- [ ] Report (written outside the repository)
 - [ ] Ten-minute presentation
 - [ ] Yearly rollover: update `history_through` and the lookup names when FDA publishes the 2026
       history files

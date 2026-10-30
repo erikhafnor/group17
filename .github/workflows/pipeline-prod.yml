@@ -5,7 +5,7 @@ name: Pipeline (prod deploy)
 on:
   push:
     branches: [main]
-    paths-ignore: ["report/**", "docs/**", "labs/**", "**.md"]
+    paths-ignore: ["docs/**", "labs/**", "**.md"]
   workflow_dispatch:
     inputs:
       stage:

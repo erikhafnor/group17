@@ -10,5 +10,5 @@
 
 - [ ] `make lint test` passes locally
 - [ ] New or changed rules have a test
-- [ ] Docs, backlog and report updated where affected
+- [ ] Docs and backlog updated where affected
 - [ ] AI use recorded in `docs/ai-use.md`, if any
