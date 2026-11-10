@@ -22,13 +22,13 @@ one pull request, reviewed by the other person.
 
 ## Stream B: devices, manufacturers and Gold
 
-- [ ] `silver.devices`: one row per report and device sequence; product code, brand, model, UDI
-- [ ] `silver.product_classification` from `foiclass` (class, specialty, implant and
+- [x] `silver.devices`: one row per report and device sequence; product code, brand, model, UDI
+- [x] `silver.product_classification` from `foiclass` (class, specialty, implant and
       life-sustaining flags)
 - [ ] `silver.manufacturers`: canonical names (normalisation, plus a curated map for the largest
       manufacturers)
 - [ ] `silver.report_device_problems`
-- [ ] `gold.monthly_product_events`
+- [x] `gold.monthly_product_events` (reconciled with Silver, in total and per event type)
 - [ ] `gold.manufacturer_product_summary`
 - [ ] `gold.product_problem_profile` with proportional reporting ratio
 

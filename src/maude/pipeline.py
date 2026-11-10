@@ -12,8 +12,11 @@ from maude.bronze.ingest import ingest
 from maude.bronze.parse import parse_pending
 from maude.config import Config
 from maude.gold.event_counts import build_monthly_event_counts
+from maude.gold.product_events import build_monthly_product_events
 from maude.quality import write_run_report
 from maude.run_context import RunContext
+from maude.silver.devices import build_devices
+from maude.silver.product_classification import build_product_classification
 from maude.silver.reports import build_reports
 from maude.sources import files_for
 from maude.spark import get_spark
@@ -62,8 +65,11 @@ def run_pipeline(
             metrics["bronze.parse"] = parse_pending(spark, cfg, run)
         if "silver" in stages:
             metrics["silver.reports"] = build_reports(spark, cfg)
+            metrics["silver.product_classification"] = build_product_classification(spark, cfg)
+            metrics["silver.devices"] = build_devices(spark, cfg)
         if "gold" in stages:
             metrics["gold.monthly_event_counts"] = build_monthly_event_counts(spark, cfg)
+            metrics["gold.monthly_product_events"] = build_monthly_product_events(spark, cfg)
         status = "succeeded"
     finally:
         summary = write_run_report(cfg.reports_dir, run.run_id, status, metrics)

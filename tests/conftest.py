@@ -20,6 +20,17 @@ MASTER_HEADER = (
     "REPORT_SOURCE_CODE|MANUFACTURER_NAME|DATE_CHANGED"
 )
 
+DEVICE_HEADER = (
+    "MDR_REPORT_KEY|DEVICE_SEQUENCE_NO|DATE_RECEIVED|BRAND_NAME|GENERIC_NAME|"
+    "MANUFACTURER_D_NAME|MODEL_NUMBER|DEVICE_REPORT_PRODUCT_CODE|UDI-DI"
+)
+CLASSIFICATION_HEADER = (
+    "REVIEW_PANEL|MEDICALSPECIALTY|PRODUCTCODE|DEVICENAME|DEVICECLASS|UNCLASSIFIED_REASON|"
+    "GMPEXEMPTFLAG|THIRDPARTYFLAG|REVIEWCODE|REGULATIONNUMBER|SUBMISSION_TYPE_ID|DEFINITION|"
+    "PHYSICALSTATE|TECHNICALMETHOD|TARGETAREA|Implant_Flag|Life_Sustain_support_flag|"
+    "SummaryMalfunctionReporting"
+)
+
 SOURCE_FILES: dict[str, tuple[str, str, list[str]]] = {
     # zip stem: (member name, encoding, records)
     "mdrfoiadd": (
@@ -42,19 +53,27 @@ SOURCE_FILES: dict[str, tuple[str, str, list[str]]] = {
             "900|R0|01/15/2001|01/01/2001|M|M|OLD CO|10/02/2026",
         ],
     ),
+    # Sequence numbers are not stable: the change file re-delivers report 1001's
+    # device under a new sequence number.
     "deviceadd": (
         "DEVICEAdd.txt",
         "cp1252",
         [
-            "MDR_REPORT_KEY|DEVICE_SEQUENCE_NO|DATE_RECEIVED|BRAND_NAME|MANUFACTURER_D_NAME",
-            "1001|1|2026/09/30|Pump Pro®|ACME MEDICAL",
+            DEVICE_HEADER,
+            "1001|11|2026/09/30|Pump Pro®|Pump, Infusion|ACME MEDICAL|PP-1|frn|00012345",
+            "1002|12|2026/09/30|Scope X|Endoscope|SCOPE CO|S-1|---|",
+            "1003|13|2026/09/30|Pipe|Thing|PIPE|IN NAME CO|M-1|FRN|",
+            "5555|14|2026/09/30|Orphan|Pump, Infusion|ACME MEDICAL|PP-1|FRN|",
         ],
     ),
     "devicechange": (
         "DEVICEChange.txt",
         "cp1252",
         [
-            "MDR_REPORT_KEY|DEVICE_SEQUENCE_NO|DATE_RECEIVED|BRAND_NAME|MANUFACTURER_D_NAME",
+            DEVICE_HEADER,
+            "1001|21|2026/09/30|Pump Pro®|Pump, Infusion|ACME MEDICAL|PP-1|FRN|00012345",
+            "900|22|2001/01/15|Old Gadget|Gadget|OLD CO|O-1|ZZZ|",
+            "900|23|2001/01/15|Old Guard|Protector, Dental|OLD CO|O-2|BRW|",
         ],
     ),
     "patientadd": (
@@ -109,8 +128,11 @@ SOURCE_FILES: dict[str, tuple[str, str, list[str]]] = {
         "foiclass.txt",
         "cp1252",
         [
-            "REVIEW_PANEL|MEDICALSPECIALTY|PRODUCTCODE|DEVICENAME|DEVICECLASS",
-            "AN|AN|BRW|Protector’s Dental|1",
+            CLASSIFICATION_HEADER,
+            "AN|AN|BRW|Protector’s Dental|1||N|N||868.5820|4|||||N|N|Eligible",
+            "HO|HO|FRN|Pump, Infusion|2||N|N||880.5725|1|||||N|Y|Eligible",
+            "HO|HO|BAD|Pipe | In Name|2||N|N||880.0000|1|||||N|N|Eligible",
+            "HO|HO||No Code|2||N|N||880.0001|1|||||N|N|Eligible",
         ],
     ),
 }
